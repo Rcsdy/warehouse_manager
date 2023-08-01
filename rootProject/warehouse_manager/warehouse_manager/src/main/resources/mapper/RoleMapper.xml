@@ -1,0 +1,100 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.pn.mapper.RoleMapper">
+<!--    public List<Role> findAllRole();-->
+    <select id="findAllRole" resultType="role">
+        select * from role where role_state = 1
+    </select>
+
+<!--    public List<Role> findRolesByUserId(Integer userId);-->
+    <select id="findRolesByUserId" resultType="role">
+        select t2.*
+        from user_role t1, role t2
+        where t1.role_id = t2.role_id
+          and t2.role_state = 1
+          and t1.user_id = #{userId}
+    </select>
+
+<!--    public Integer findRoleIdByName(String roleName);-->
+
+    <select id="findRoleIdByName" resultType="integer">
+        select role_id from role where role_name = #{roleName}
+    </select>
+
+    <delete id="removeRoleByUserId">
+        delete from user_role where user_id = #{userId}
+    </delete>
+
+    <select id="findRoleIdByUserId" resultType="integer">
+        select role_id from user_role where user_id = #{userId}
+    </select>
+<!--    public Integer insertRoleByRoleId(Integer roleId,Integer userId);-->
+
+    <insert id="insertRoleByRoleId">
+        insert into user_role values (null, #{roleId}, #{userId})
+    </insert>
+
+<!--    public Integer findRoleRowCount(Role role);-->
+    <select id="findRoleRowCount" resultType="integer">
+        select count(*) from role
+        <where>
+            <if test="roleName != null and roleName != ''">
+                and role_name like concat("%",#{roleName},"%")
+            </if>
+            <if test="roleCode != null and roleCode != ''">
+                and role_code = #{roleCode}
+            </if>
+            <if test="roleState != null and roleState != ''">
+                and role_state = #{roleState}
+            </if>
+        </where>
+    </select>
+<!--        public List<Role> findRoleByPage(@Param("page") Page page, @Param("role") Role role);-->
+    <select id="findRoleByPage" resultType="role">
+        select t1.*, t2.user_code getCode
+        from role t1, user_info t2
+        where t1.create_by = t2.user_id
+        <if test="role.roleName != null and role.roleName != ''">
+            and t1.role_name like concat("%",#{role.roleName},"%")
+        </if>
+        <if test="role.roleCode != null and role.roleCode != ''">
+            and t1.role_code = #{role.roleCode}
+        </if>
+        <if test="role.roleState != null and role.roleState != ''">
+            and t1.role_state = #{role.roleState}
+        </if>
+        order by t1.role_id
+        limit #{page.limitIndex}, #{page.pageSize}
+    </select>
+
+<!--    public Role findRoleByNameOrCode(String roleName,String roleCode);-->
+    <select id="findRoleByNameOrCode" resultType="role">
+        select * from role where role_name = #{roleName} or role_code = #{roleCode}
+    </select>
+
+<!--    public int insertRole(Role role);-->
+    <insert id="insertRole">
+        insert into role values(null, #{roleName}, #{roleDesc}, #{roleCode}, 0, #{createBy}, now(), null, null)
+    </insert>
+
+<!--    public int updateRoleStateByRoleId(Integer roleId, String roleState);-->
+    <update id="updateRoleStateByRoleId">
+        update role set role_state = #{roleState} where role_id = #{roleId}
+    </update>
+<!--        public int removeRoleByRoleId(Integer roleId);-->
+    <delete id="removeRoleByRoleId">
+        delete from role where role_id = #{roleId}
+    </delete>
+<!--        public int removeRoleAuthByRoleId(Integer roleId);-->
+    <delete id="removeRoleAuthByRoleId">
+        delete from role_auth where role_id = #{roleId}
+    </delete>
+<!--    public int updateRoleDescByRoleId(Role role);-->
+    <update id="updateRoleDescByRoleId">
+        update role
+        set role_desc = #{roleDesc}, update_by = #{updateBy}, update_time = now()
+        where role_id = #{roleId}
+    </update>
+</mapper>
